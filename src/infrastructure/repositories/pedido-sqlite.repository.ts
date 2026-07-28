@@ -1,28 +1,56 @@
 import { Pedido } from '@/domain/entities/pedido';
 import { NuevoPedido, PedidoRepository } from '@/domain/repositories/pedido-repository';
+import { getDatabase } from '@/infrastructure/database/sqlite-client';
 
-/**
- * TODO: implementar contra SQLite (expo-sqlite) usando el cliente de
- * infrastructure/database. Por ahora solo define la forma del repositorio.
- */
 export class PedidoSqliteRepository implements PedidoRepository {
   async getAll(): Promise<Pedido[]> {
-    throw new Error('PedidoSqliteRepository.getAll: not implemented yet');
+    const db = await getDatabase();
+    return db.getAllAsync<Pedido>('SELECT * FROM pedidos ORDER BY fechaRegistro DESC');
   }
 
-  async getById(_id: number): Promise<Pedido | null> {
-    throw new Error('PedidoSqliteRepository.getById: not implemented yet');
+  async getById(id: number): Promise<Pedido | null> {
+    const db = await getDatabase();
+    const row = await db.getFirstAsync<Pedido>('SELECT * FROM pedidos WHERE id = ?', id);
+    return row ?? null;
   }
 
-  async create(_pedido: NuevoPedido): Promise<Pedido> {
-    throw new Error('PedidoSqliteRepository.create: not implemented yet');
+  async create(pedido: NuevoPedido): Promise<Pedido> {
+    const db = await getDatabase();
+    const fechaRegistro = new Date().toISOString();
+    const result = await db.runAsync(
+      'INSERT INTO pedidos (clienteNombre, producto, cantidad, precio, estado, fechaRegistro) VALUES (?, ?, ?, ?, ?, ?)',
+      pedido.clienteNombre,
+      pedido.producto,
+      pedido.cantidad,
+      pedido.precio,
+      pedido.estado,
+      fechaRegistro,
+    );
+    return { id: result.lastInsertRowId, fechaRegistro, ...pedido };
   }
 
-  async update(_id: number, _pedido: Partial<NuevoPedido>): Promise<Pedido> {
-    throw new Error('PedidoSqliteRepository.update: not implemented yet');
+  async update(id: number, pedido: Partial<NuevoPedido>): Promise<Pedido> {
+    const current = await this.getById(id);
+    if (!current) {
+      throw new Error(`Pedido ${id} no encontrado`);
+    }
+
+    const updated = { ...current, ...pedido };
+    const db = await getDatabase();
+    await db.runAsync(
+      'UPDATE pedidos SET clienteNombre = ?, producto = ?, cantidad = ?, precio = ?, estado = ? WHERE id = ?',
+      updated.clienteNombre,
+      updated.producto,
+      updated.cantidad,
+      updated.precio,
+      updated.estado,
+      id,
+    );
+    return updated;
   }
 
-  async delete(_id: number): Promise<void> {
-    throw new Error('PedidoSqliteRepository.delete: not implemented yet');
+  async delete(id: number): Promise<void> {
+    const db = await getDatabase();
+    await db.runAsync('DELETE FROM pedidos WHERE id = ?', id);
   }
 }
