@@ -26,6 +26,10 @@ export const Colors = {
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
+// Color extraído del ícono de la app (assets/images/icono.jpg), usado como acento de marca.
+export const BrandColor = '#F35744';
+export const BrandColorPressed = '#D6432F';
+
 export const Fonts = Platform.select({
   ios: {
     /** iOS `UIFontDescriptorSystemDesignDefault` */

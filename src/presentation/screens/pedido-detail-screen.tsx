@@ -1,13 +1,13 @@
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, Pressable, StyleSheet } from 'react-native';
+import { Alert, Pressable } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { pedidoService } from '@/application/services/pedido.service';
 import { PedidoForm } from '@/presentation/components/pedido-form';
 import { ThemedText } from '@/presentation/components/themed-text';
 import { ThemedView } from '@/presentation/components/themed-view';
-import { Spacing } from '@/presentation/styles/theme';
 import { Pedido } from '@/domain/entities/pedido';
 import { NuevoPedido } from '@/domain/repositories/pedido-repository';
 
@@ -60,32 +60,32 @@ export function PedidoDetailScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ThemedView style={styles.container}>
-        <ThemedText type="title" style={styles.title}>
+    <SafeAreaView className="flex-1">
+      <ThemedView className="flex-1">
+        <ThemedText type="title" className="px-6 pt-6">
           Detalle del pedido
         </ThemedText>
 
         {loading && (
-          <ThemedText type="small" style={styles.message}>
+          <ThemedText type="small" className="px-6 pt-4">
             Cargando…
           </ThemedText>
         )}
 
         {!loading && error && (
-          <ThemedText type="small" style={styles.error}>
+          <ThemedText type="small" className="px-6 pt-4 text-red-600">
             {error}
           </ThemedText>
         )}
 
         {!loading && !error && !pedido && (
-          <ThemedText type="small" style={styles.message}>
+          <ThemedText type="small" className="px-6 pt-4">
             Pedido no encontrado.
           </ThemedText>
         )}
 
         {!loading && pedido && (
-          <>
+          <Animated.View entering={FadeInDown.duration(300)}>
             <PedidoForm
               initialValues={{
                 clienteNombre: pedido.clienteNombre,
@@ -98,43 +98,14 @@ export function PedidoDetailScreen() {
               submitting={submitting}
               onSubmit={handleSubmit}
             />
-            <Pressable onPress={handleDelete} style={styles.deleteButton}>
-              <ThemedText type="link" style={styles.deleteText}>
+            <Pressable onPress={handleDelete} className="items-center py-6 active:opacity-60">
+              <ThemedText type="link" className="text-red-600">
                 Eliminar pedido
               </ThemedText>
             </Pressable>
-          </>
+          </Animated.View>
         )}
       </ThemedView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-  },
-  title: {
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.four,
-  },
-  message: {
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
-  },
-  error: {
-    color: '#d33',
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
-  },
-  deleteButton: {
-    alignItems: 'center',
-    paddingVertical: Spacing.four,
-  },
-  deleteText: {
-    color: '#d33',
-  },
-});

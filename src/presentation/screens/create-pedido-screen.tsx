@@ -1,13 +1,12 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { pedidoService } from '@/application/services/pedido.service';
 import { PedidoForm } from '@/presentation/components/pedido-form';
 import { ThemedText } from '@/presentation/components/themed-text';
 import { ThemedView } from '@/presentation/components/themed-view';
-import { Spacing } from '@/presentation/styles/theme';
 import { NuevoPedido } from '@/domain/repositories/pedido-repository';
 
 export function CreatePedidoScreen() {
@@ -28,36 +27,20 @@ export function CreatePedidoScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ThemedView style={styles.container}>
-        <ThemedText type="title" style={styles.title}>
-          Nuevo pedido
-        </ThemedText>
-        {error && (
-          <ThemedText type="small" style={styles.error}>
-            {error}
+    <SafeAreaView className="flex-1">
+      <ThemedView className="flex-1">
+        <Animated.View entering={FadeInDown.duration(300)}>
+          <ThemedText type="title" className="px-6 pt-6">
+            Nuevo pedido
           </ThemedText>
-        )}
+          {error && (
+            <ThemedText type="small" className="px-6 pt-2 text-red-600">
+              {error}
+            </ThemedText>
+          )}
+        </Animated.View>
         <PedidoForm submitLabel="Guardar pedido" submitting={submitting} onSubmit={handleSubmit} />
       </ThemedView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-  },
-  title: {
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.four,
-  },
-  error: {
-    color: '#d33',
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.two,
-  },
-});

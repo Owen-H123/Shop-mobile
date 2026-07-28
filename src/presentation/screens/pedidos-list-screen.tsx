@@ -1,27 +1,29 @@
 import { Link, router, useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
-import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { FlatList, Pressable, View } from 'react-native';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/presentation/components/themed-text';
 import { ThemedView } from '@/presentation/components/themed-view';
 import { usePedidos } from '@/presentation/hooks/use-pedidos';
-import { Spacing } from '@/presentation/styles/theme';
 import { Pedido } from '@/domain/entities/pedido';
 
-function PedidoRow({ pedido }: { pedido: Pedido }) {
+function PedidoRow({ pedido, index }: { pedido: Pedido; index: number }) {
   return (
-    <Pressable onPress={() => router.push(`/pedidos/${pedido.id}`)}>
-      <ThemedView type="backgroundElement" style={styles.row}>
-        <ThemedText type="smallBold">{pedido.clienteNombre}</ThemedText>
-        <ThemedText type="small" themeColor="textSecondary">
-          {pedido.producto} · x{pedido.cantidad}
-        </ThemedText>
-        <ThemedText type="small">
-          ${pedido.precio.toFixed(2)} · {pedido.estado}
-        </ThemedText>
-      </ThemedView>
-    </Pressable>
+    <Animated.View entering={FadeInDown.delay(Math.min(index, 8) * 40).duration(300)}>
+      <Pressable onPress={() => router.push(`/pedidos/${pedido.id}`)} className="active:scale-[0.98]">
+        <ThemedView type="backgroundElement" className="gap-0.5 rounded-2xl p-4">
+          <ThemedText type="smallBold">{pedido.clienteNombre}</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">
+            {pedido.producto} · x{pedido.cantidad}
+          </ThemedText>
+          <ThemedText type="small">
+            ${pedido.precio.toFixed(2)} · {pedido.estado}
+          </ThemedText>
+        </ThemedView>
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -35,11 +37,11 @@ export function PedidosListScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ThemedView style={styles.container}>
-        <View style={styles.header}>
+    <SafeAreaView className="flex-1">
+      <ThemedView className="flex-1 px-6">
+        <Animated.View entering={FadeInUp.duration(350)} className="gap-2 py-6">
           <ThemedText type="title">Pedidos</ThemedText>
-          <View style={styles.headerLinks}>
+          <View className="flex-row gap-6">
             <Link href="/products">
               <ThemedText type="linkPrimary">Catálogo</ThemedText>
             </Link>
@@ -47,82 +49,40 @@ export function PedidosListScreen() {
               <ThemedText type="linkPrimary">Perfil</ThemedText>
             </Link>
           </View>
-        </View>
+        </Animated.View>
 
         {error && (
-          <ThemedView type="backgroundElement" style={styles.message}>
+          <ThemedView type="backgroundElement" className="mb-4 rounded-2xl p-6">
             <ThemedText type="small">{error}</ThemedText>
           </ThemedView>
         )}
 
         {!error && loading && pedidos.length === 0 && (
-          <ThemedView type="backgroundElement" style={styles.message}>
+          <ThemedView type="backgroundElement" className="mb-4 rounded-2xl p-6">
             <ThemedText type="small">Cargando pedidos…</ThemedText>
           </ThemedView>
         )}
 
         {!error && !loading && pedidos.length === 0 && (
-          <ThemedView type="backgroundElement" style={styles.message}>
+          <ThemedView type="backgroundElement" className="mb-4 rounded-2xl p-6">
             <ThemedText type="small">Todavía no hay pedidos registrados.</ThemedText>
           </ThemedView>
         )}
 
         <FlatList
-          style={styles.list}
+          className="flex-1"
           data={pedidos}
           keyExtractor={(pedido) => String(pedido.id)}
-          renderItem={({ item }) => <PedidoRow pedido={item} />}
-          contentContainerStyle={styles.listContent}
+          renderItem={({ item, index }) => <PedidoRow pedido={item} index={index} />}
+          contentContainerStyle={{ gap: 8, paddingBottom: 16 }}
         />
 
-        <Pressable onPress={() => router.push('/pedidos/create')}>
-          <ThemedView type="backgroundSelected" style={styles.createButton}>
-            <ThemedText type="linkPrimary">+ Nuevo pedido</ThemedText>
-          </ThemedView>
+        <Pressable onPress={() => router.push('/pedidos/create')} className="items-center active:scale-95">
+          <View className="my-4 rounded-full bg-brand px-8 py-3">
+            <ThemedText className="font-semibold text-white">+ Nuevo pedido</ThemedText>
+          </View>
         </Pressable>
       </ThemedView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-  },
-  header: {
-    paddingVertical: Spacing.four,
-    gap: Spacing.two,
-  },
-  headerLinks: {
-    flexDirection: 'row',
-    gap: Spacing.four,
-  },
-  message: {
-    padding: Spacing.four,
-    borderRadius: Spacing.three,
-    marginBottom: Spacing.three,
-  },
-  list: {
-    flex: 1,
-  },
-  listContent: {
-    gap: Spacing.two,
-    paddingBottom: Spacing.four,
-  },
-  row: {
-    padding: Spacing.three,
-    borderRadius: Spacing.three,
-    gap: Spacing.half,
-  },
-  createButton: {
-    alignSelf: 'center',
-    marginVertical: Spacing.three,
-    paddingHorizontal: Spacing.five,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
-  },
-});

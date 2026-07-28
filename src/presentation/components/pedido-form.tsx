@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { ThemedText } from '@/presentation/components/themed-text';
 import { ThemedView } from '@/presentation/components/themed-view';
 import { useTheme } from '@/presentation/hooks/use-theme';
-import { Spacing } from '@/presentation/styles/theme';
 import { EstadoPedido } from '@/domain/entities/pedido';
 import { NuevoPedido } from '@/domain/repositories/pedido-repository';
 
@@ -62,14 +62,14 @@ export function PedidoForm({ initialValues, submitLabel, submitting, onSubmit }:
   }
 
   return (
-    <View style={styles.form}>
-      <View style={styles.field}>
+    <Animated.View entering={FadeIn.duration(300)} className="gap-4 p-6">
+      <View className="gap-1">
         <ThemedText type="small" themeColor="textSecondary">
           Cliente
         </ThemedText>
-        <ThemedView type="backgroundElement" style={styles.inputWrapper}>
+        <ThemedView type="backgroundElement" className="rounded-lg px-4">
           <TextInput
-            style={[styles.input, { color: theme.text }]}
+            className="py-3 text-black dark:text-white"
             value={clienteNombre}
             onChangeText={setClienteNombre}
             placeholder="Nombre del cliente"
@@ -78,13 +78,13 @@ export function PedidoForm({ initialValues, submitLabel, submitting, onSubmit }:
         </ThemedView>
       </View>
 
-      <View style={styles.field}>
+      <View className="gap-1">
         <ThemedText type="small" themeColor="textSecondary">
           Producto
         </ThemedText>
-        <ThemedView type="backgroundElement" style={styles.inputWrapper}>
+        <ThemedView type="backgroundElement" className="rounded-lg px-4">
           <TextInput
-            style={[styles.input, { color: theme.text }]}
+            className="py-3 text-black dark:text-white"
             value={producto}
             onChangeText={setProducto}
             placeholder="Producto"
@@ -93,13 +93,13 @@ export function PedidoForm({ initialValues, submitLabel, submitting, onSubmit }:
         </ThemedView>
       </View>
 
-      <View style={styles.field}>
+      <View className="gap-1">
         <ThemedText type="small" themeColor="textSecondary">
           Cantidad
         </ThemedText>
-        <ThemedView type="backgroundElement" style={styles.inputWrapper}>
+        <ThemedView type="backgroundElement" className="rounded-lg px-4">
           <TextInput
-            style={[styles.input, { color: theme.text }]}
+            className="py-3 text-black dark:text-white"
             value={cantidad}
             onChangeText={setCantidad}
             placeholder="0"
@@ -109,13 +109,13 @@ export function PedidoForm({ initialValues, submitLabel, submitting, onSubmit }:
         </ThemedView>
       </View>
 
-      <View style={styles.field}>
+      <View className="gap-1">
         <ThemedText type="small" themeColor="textSecondary">
           Precio
         </ThemedText>
-        <ThemedView type="backgroundElement" style={styles.inputWrapper}>
+        <ThemedView type="backgroundElement" className="rounded-lg px-4">
           <TextInput
-            style={[styles.input, { color: theme.text }]}
+            className="py-3 text-black dark:text-white"
             value={precio}
             onChangeText={setPrecio}
             placeholder="0.00"
@@ -125,16 +125,16 @@ export function PedidoForm({ initialValues, submitLabel, submitting, onSubmit }:
         </ThemedView>
       </View>
 
-      <View style={styles.field}>
+      <View className="gap-1">
         <ThemedText type="small" themeColor="textSecondary">
           Estado
         </ThemedText>
-        <View style={styles.estadoRow}>
+        <View className="flex-row flex-wrap gap-2">
           {ESTADOS.map((item) => (
-            <Pressable key={item} onPress={() => setEstado(item)}>
+            <Pressable key={item} onPress={() => setEstado(item)} className="active:scale-95">
               <ThemedView
                 type={estado === item ? 'backgroundSelected' : 'backgroundElement'}
-                style={styles.estadoChip}>
+                className="rounded-full px-4 py-1.5">
                 <ThemedText type="small">{item}</ThemedText>
               </ThemedView>
             </Pressable>
@@ -143,54 +143,16 @@ export function PedidoForm({ initialValues, submitLabel, submitting, onSubmit }:
       </View>
 
       {error && (
-        <ThemedText type="small" style={styles.error}>
+        <ThemedText type="small" className="text-red-600">
           {error}
         </ThemedText>
       )}
 
-      <Pressable onPress={handleSubmit} disabled={submitting} style={styles.submitButton}>
-        <ThemedView type="backgroundSelected" style={styles.submitButtonInner}>
+      <Pressable onPress={handleSubmit} disabled={submitting} className="self-start active:scale-95">
+        <ThemedView type="backgroundSelected" className="rounded-full px-6 py-3">
           <ThemedText type="linkPrimary">{submitting ? 'Guardando…' : submitLabel}</ThemedText>
         </ThemedView>
       </Pressable>
-    </View>
+    </Animated.View>
   );
 }
-
-const styles = StyleSheet.create({
-  form: {
-    gap: Spacing.three,
-    padding: Spacing.four,
-  },
-  field: {
-    gap: Spacing.one,
-  },
-  inputWrapper: {
-    borderRadius: Spacing.two,
-    paddingHorizontal: Spacing.three,
-  },
-  input: {
-    paddingVertical: Spacing.two,
-  },
-  estadoRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.two,
-  },
-  estadoChip: {
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.one,
-    borderRadius: Spacing.five,
-  },
-  error: {
-    color: '#d33',
-  },
-  submitButton: {
-    alignSelf: 'flex-start',
-  },
-  submitButtonInner: {
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
-  },
-});
