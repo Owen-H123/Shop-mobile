@@ -1,14 +1,19 @@
-import { useState } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import { useState } from "react";
+import { Pressable, TextInput, View } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
 
-import { ThemedText } from '@/presentation/components/themed-text';
-import { ThemedView } from '@/presentation/components/themed-view';
-import { useTheme } from '@/presentation/hooks/use-theme';
-import { EstadoPedido } from '@/domain/entities/pedido';
-import { NuevoPedido } from '@/domain/repositories/pedido-repository';
+import { EstadoPedido } from "@/domain/entities/pedido";
+import { NuevoPedido } from "@/domain/repositories/pedido-repository";
+import { ThemedText } from "@/presentation/components/themed-text";
+import { ThemedView } from "@/presentation/components/themed-view";
+import { useTheme } from "@/presentation/hooks/use-theme";
 
-const ESTADOS: EstadoPedido[] = ['PENDIENTE', 'EN_PROCESO', 'ENTREGADO', 'CANCELADO'];
+const ESTADOS: EstadoPedido[] = [
+  "PENDIENTE",
+  "EN_PROCESO",
+  "ENTREGADO",
+  "CANCELADO",
+];
 
 type PedidoFormValues = {
   clienteNombre: string;
@@ -25,13 +30,22 @@ type PedidoFormProps = {
   onSubmit: (pedido: NuevoPedido) => void;
 };
 
-export function PedidoForm({ initialValues, submitLabel, submitting, onSubmit }: PedidoFormProps) {
+export function PedidoForm({
+  initialValues,
+  submitLabel,
+  submitting,
+  onSubmit,
+}: PedidoFormProps) {
   const theme = useTheme();
-  const [clienteNombre, setClienteNombre] = useState(initialValues?.clienteNombre ?? '');
-  const [producto, setProducto] = useState(initialValues?.producto ?? '');
-  const [cantidad, setCantidad] = useState(initialValues?.cantidad ?? '');
-  const [precio, setPrecio] = useState(initialValues?.precio ?? '');
-  const [estado, setEstado] = useState<EstadoPedido>(initialValues?.estado ?? 'PENDIENTE');
+  const [clienteNombre, setClienteNombre] = useState(
+    initialValues?.clienteNombre ?? "",
+  );
+  const [producto, setProducto] = useState(initialValues?.producto ?? "");
+  const [cantidad, setCantidad] = useState(initialValues?.cantidad ?? "");
+  const [precio, setPrecio] = useState(initialValues?.precio ?? "");
+  const [estado, setEstado] = useState<EstadoPedido>(
+    initialValues?.estado ?? "PENDIENTE",
+  );
   const [error, setError] = useState<string | null>(null);
 
   function handleSubmit() {
@@ -39,15 +53,15 @@ export function PedidoForm({ initialValues, submitLabel, submitting, onSubmit }:
     const precioNumero = Number(precio);
 
     if (!clienteNombre.trim() || !producto.trim()) {
-      setError('Cliente y producto son obligatorios.');
+      setError("Cliente y producto son obligatorios.");
       return;
     }
     if (!Number.isFinite(cantidadNumero) || cantidadNumero <= 0) {
-      setError('La cantidad debe ser un número mayor a 0.');
+      setError("La cantidad debe ser un número mayor a 0.");
       return;
     }
     if (!Number.isFinite(precioNumero) || precioNumero < 0) {
-      setError('El precio debe ser un número válido.');
+      setError("El precio debe ser un número válido.");
       return;
     }
 
@@ -111,7 +125,7 @@ export function PedidoForm({ initialValues, submitLabel, submitting, onSubmit }:
 
       <View className="gap-1">
         <ThemedText type="small" themeColor="textSecondary">
-          Precio
+          Precio (S/)
         </ThemedText>
         <ThemedView type="backgroundElement" className="rounded-lg px-4">
           <TextInput
@@ -131,10 +145,17 @@ export function PedidoForm({ initialValues, submitLabel, submitting, onSubmit }:
         </ThemedText>
         <View className="flex-row flex-wrap gap-2">
           {ESTADOS.map((item) => (
-            <Pressable key={item} onPress={() => setEstado(item)} className="active:scale-95">
+            <Pressable
+              key={item}
+              onPress={() => setEstado(item)}
+              className="active:scale-95"
+            >
               <ThemedView
-                type={estado === item ? 'backgroundSelected' : 'backgroundElement'}
-                className="rounded-full px-4 py-1.5">
+                type={
+                  estado === item ? "backgroundSelected" : "backgroundElement"
+                }
+                className="rounded-full px-4 py-1.5"
+              >
                 <ThemedText type="small">{item}</ThemedText>
               </ThemedView>
             </Pressable>
@@ -148,9 +169,18 @@ export function PedidoForm({ initialValues, submitLabel, submitting, onSubmit }:
         </ThemedText>
       )}
 
-      <Pressable onPress={handleSubmit} disabled={submitting} className="self-start active:scale-95">
-        <ThemedView type="backgroundSelected" className="rounded-full px-6 py-3">
-          <ThemedText type="linkPrimary">{submitting ? 'Guardando…' : submitLabel}</ThemedText>
+      <Pressable
+        onPress={handleSubmit}
+        disabled={submitting}
+        className="self-start active:scale-95"
+      >
+        <ThemedView
+          type="backgroundSelected"
+          className="rounded-full px-6 py-3"
+        >
+          <ThemedText type="linkPrimary">
+            {submitting ? "Guardando…" : submitLabel}
+          </ThemedText>
         </ThemedView>
       </Pressable>
     </Animated.View>
