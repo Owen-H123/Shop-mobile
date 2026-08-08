@@ -1,12 +1,14 @@
 import { Usuario } from '@/domain/entities/usuario';
 import { AuthRepository, Credenciales } from '@/domain/repositories/auth-repository';
 import { getDatabase } from '@/infrastructure/database/sqlite-client';
+import { hashPassword } from '@/infrastructure/security/password-hasher';
 
 type UsuarioRow = {
   id: number;
   nombre: string;
   usuario: string;
   password: string;
+  salt: string | null;
   rol: 'ADMIN' | 'VENDEDOR';
 };
 
@@ -18,12 +20,14 @@ export class AuthSqliteRepository implements AuthRepository {
   async login({ usuario, password }: Credenciales): Promise<Usuario | null> {
     const db = await getDatabase();
     const row = await db.getFirstAsync<UsuarioRow>(
-      'SELECT * FROM usuarios WHERE usuario = ? COLLATE NOCASE AND password = ?',
+      'SELECT * FROM usuarios WHERE usuario = ? COLLATE NOCASE',
       usuario.trim(),
-      password,
     );
 
-    if (!row) return null;
+    if (!row || !row.salt) return null;
+
+    const passwordHash = await hashPassword(password, row.salt);
+    if (passwordHash !== row.password) return null;
 
     // Persistimos la sesión localmente para que se mantenga al reabrir la app.
     await db.runAsync(
